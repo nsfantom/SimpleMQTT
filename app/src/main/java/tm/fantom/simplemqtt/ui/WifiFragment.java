@@ -73,23 +73,16 @@ public final class WifiFragment extends Fragment {
         binding.rvNetworks.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvNetworks.setAdapter(adapter);
         adapter.setItemClickedListener(scanResult -> {
+            Timber.e("connect to: %s", scanResult.SSID);
             WifiConfiguration conf = new WifiConfiguration();
             conf.SSID = "\"" + scanResult.SSID + "\"";   // Please note the quotes. String should contain ssid in quotes
             conf.preSharedKey = "\"" + networkPass + "\"";
             conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
 
-            mainWifi.addNetwork(conf);
-
-            Timber.e("connect to: %s", scanResult.SSID);
-            List<WifiConfiguration> list = mainWifi.getConfiguredNetworks();
-            for (WifiConfiguration i : list) {
-                if (i.SSID != null && i.SSID.equals("\"" + scanResult.SSID + "\"")) {
-                    mainWifi.disconnect();
-                    mainWifi.enableNetwork(i.networkId, true);
-                    mainWifi.reconnect();
-                    break;
-                }
-            }
+            int netId = mainWifi.addNetwork(conf);
+            mainWifi.disconnect();
+            mainWifi.enableNetwork(netId, true);
+            mainWifi.reconnect();
             listener.onNetSelected();
         });
         binding.errorHolder.setVisibility(View.GONE);
