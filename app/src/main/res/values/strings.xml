@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">SimpleMQTT</string>
+
+
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="no_connection">No connection!</string>
+    <string name="btn_go_online">Go online.</string>
+    <string name="error">Error</string>
+</resources>
