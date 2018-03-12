@@ -12,13 +12,19 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -57,7 +63,7 @@ public final class WifiFragment extends Fragment {
         }
         super.onAttach(context);
         listener = (Listener) getActivity();
-        adapter = new WiFiAdapter();
+        adapter = new WiFiAdapter().setShortView(true);
     }
 
     @Override
@@ -72,18 +78,22 @@ public final class WifiFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         binding.rvNetworks.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvNetworks.setAdapter(adapter);
+        binding.rvNetworks.setItemAnimator(new DefaultItemAnimator());
         adapter.setItemClickedListener(scanResult -> {
+
+//            AddNetFragment.newInstance().show(getSupportFragmentManager(), "new-driver");
             Timber.e("connect to: %s", scanResult.SSID);
             WifiConfiguration conf = new WifiConfiguration();
             conf.SSID = "\"" + scanResult.SSID + "\"";   // Please note the quotes. String should contain ssid in quotes
-            conf.preSharedKey = "\"" + networkPass + "\"";
-            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-
-            int netId = mainWifi.addNetwork(conf);
-            mainWifi.disconnect();
-            mainWifi.enableNetwork(netId, true);
-            mainWifi.reconnect();
-            listener.onNetSelected();
+//            conf.preSharedKey = "\"" + networkPass + "\"";
+//            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+//
+//            int netId = mainWifi.addNetwork(conf);
+//            mainWifi.disconnect();
+//            mainWifi.enableNetwork(netId, true);
+//            mainWifi.reconnect();
+//            listener.onNetSelected();
+            requestPassword(scanResult.SSID);
         });
         binding.errorHolder.setVisibility(View.GONE);
         binding.btnScan.setOnClickListener(v -> mainWifi.startScan());
@@ -94,20 +104,52 @@ public final class WifiFragment extends Fragment {
         if (!mainWifi.isWifiEnabled()) {
             mainWifi.setWifiEnabled(true);
         }
-
-        doInback();
+        doInBackground();
     }
 
-    public void doInback() {
+    @WorkerThread
+    public void doInBackground() {
         handler.postDelayed(() -> {
-            // TODO Auto-generated method stub
+
 //            mainWifi = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 //            receiverWifi = new WifiReceiver();
 //            getActivity().registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             mainWifi.startScan();
-            doInback();
-        }, 1000);
+            doInBackground();
+        }, 3000);
 
+    }
+
+    private WifiConfiguration conf;
+    private void connectToNetwork(String netPass){
+
+        conf.preSharedKey = "\"" + netPass + "\"";
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+
+        int netId = mainWifi.addNetwork(conf);
+        mainWifi.disconnect();
+        mainWifi.enableNetwork(netId, true);
+        mainWifi.reconnect();
+        listener.onNetSelected();
+    }
+
+    private void requestPassword(String ssid){
+        final AppCompatEditText etPass = new AppCompatEditText(getActivity());
+        etPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setTitle(ssid)
+                .setMessage("password")
+                .setView(etPass)
+                .setPositiveButton(R.string.add, (dialog1, which) -> {
+                    if(etPass.getText().toString().length()<8){
+                        Toast.makeText(getContext(),R.string.error_invalid_pass, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    connectToNetwork(etPass.getText().toString());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dialog.show();
     }
 
     @Override
@@ -160,8 +202,9 @@ public final class WifiFragment extends Fragment {
     class WifiReceiver extends BroadcastReceiver {
         public void onReceive(Context c, Intent intent) {
             List<ScanResult> wifiList = mainWifi.getScanResults();
-            if (wifiList != null && wifiList.size() > 0)
+            if (wifiList != null && wifiList.size() > 0) {
                 adapter.setScanResults(wifiList);
+            }
         }
     }
 }

@@ -38,8 +38,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llTop"
-            app:layout_constraintBottom_toTopOf="@+id/errorHolder"
-            />
+            app:layout_constraintBottom_toTopOf="@+id/errorHolder" />
         <TextView
             android:id="@+id/errorHolder"
             android:layout_width="wrap_content"
