@@ -10,12 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.widget.Toast;
 
-import com.jakewharton.rxbinding2.widget.RxTextView;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.PublishSubject;
 import tm.fantom.simplemqtt.R;
 import tm.fantom.simplemqtt.databinding.FragmentAddNetworkBinding;
@@ -45,16 +40,16 @@ public final class AddNetFragment extends DialogFragment {
 //        View view = LayoutInflater.from(context).inflate(R.layout.fragment_add_network, null);
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.fragment_add_network, null, false);
         binding.networkName.setText(scanResult.SSID);
-        Observable.combineLatest(createClicked, RxTextView.textChanges(binding.etPass),
-                (ignored, text) -> text.toString())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(text -> {
-                    if (!isPassValid(text)) {
-                        Toast.makeText(getActivity(), R.string.error_invalid_pass, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                });
+//        Observable.combineLatest(createClicked, RxTextView.textChanges(binding.etPass),
+//                (ignored, text) -> text.toString())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(text -> {
+//                    if (!isPassValid(text)) {
+//                        Toast.makeText(getActivity(), R.string.error_invalid_pass, Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
+//
+//                });
 
         return new AlertDialog.Builder(context)
                 .setTitle(R.string.connect_network) // Set title for dialog

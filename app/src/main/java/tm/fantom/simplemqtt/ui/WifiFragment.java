@@ -83,7 +83,7 @@ public final class WifiFragment extends Fragment {
 
 //            AddNetFragment.newInstance().show(getSupportFragmentManager(), "new-driver");
             Timber.e("connect to: %s", scanResult.SSID);
-            WifiConfiguration conf = new WifiConfiguration();
+            conf = new WifiConfiguration();
             conf.SSID = "\"" + scanResult.SSID + "\"";   // Please note the quotes. String should contain ssid in quotes
 //            conf.preSharedKey = "\"" + networkPass + "\"";
 //            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
